@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 /**
  *  接口统一返回
- * Author: 杜报胶
+ * Author: duke
  * Date: 2018-09-13
  */
 public class ApiResult implements Serializable{
