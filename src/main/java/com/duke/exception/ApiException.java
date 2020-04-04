@@ -6,6 +6,18 @@ public class ApiException extends RuntimeException {
 
     private int code;
 
+    public static ApiException toLogin(){
+        return  new ApiException(401,"未登录");
+    }
+
+    public static ApiException fail(String message){
+        return  new ApiException(500,message);
+    }
+
+    public static ApiException fail(){
+        return  new ApiException(500,"服务器异常");
+    }
+
     public ApiException(int code,String message) {
         super(message);
         this.code = code;
