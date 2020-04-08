@@ -1,8 +1,10 @@
 package com.duke.aop;
 
 import com.duke.pojo.ApiResult;
+import com.duke.pojo.LoginData;
 import com.duke.task.AsyncTaskService;
 import com.duke.util.ExceptionUtils;
+import com.duke.util.ParamVerification;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -12,11 +14,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -55,18 +60,25 @@ public class WebControllerAop {
      */
     @Around("executeService()") //指定拦截器规则；也可以直接把“execution(* com.............)”写进这里
     public Object Interceptor(ProceedingJoinPoint pjp) throws Throwable {
-        long startTime = System.currentTimeMillis();
         MethodSignature signature = (MethodSignature) pjp.getSignature();
+
+
         //获取被拦截的方法
         Method method = signature.getMethod();
+
+
+
         //获取被拦截的方法名
         String methodName = method.getName();
 
         Object[] args = pjp.getArgs();
-
-        logger.info("当前请求的参数是{}", args);
+        long startTime = System.currentTimeMillis();
         ApiResult apiResult = null;
         try {
+            logger.info("当前请求的参数是{}", args);
+
+            paramVerification(method,args);
+
             Object result =  pjp.proceed();
 
             apiResult = ApiResult.returnSuccess("成功",result);
@@ -81,6 +93,23 @@ public class WebControllerAop {
         }
 
         return apiResult;
+    }
+
+    private void paramVerification(Method method,Object[] args) throws Exception {
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        if (parameterAnnotations == null || parameterAnnotations.length == 0) {
+            return ;
+        }
+        int t = 0;
+        for (Annotation[] parameterAnnotation : parameterAnnotations) {
+            for (Annotation annotation : parameterAnnotation) {
+                if (annotation instanceof RequestBody) {
+                    ParamVerification.valid(args[t]);
+                }
+            }
+            t++;
+        }
+
     }
 
 

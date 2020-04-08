@@ -20,7 +20,7 @@ public class UserController {
 
     @PostMapping("login")
     public Object Login(@RequestBody LoginData data) throws Exception{
-        ParamVerification.valid(data);
+        //ParamVerification.valid(data);
         return userService.login(data);
     }
 
